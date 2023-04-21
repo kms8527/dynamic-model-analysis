@@ -100,16 +100,27 @@ pred_result['F_rx'] = [-(Cm1 - Cm2 * vx) * throttle - Cr - Cd * vx**2 for vx, th
 Dr = 130000; Cr = 1; Br = 1;
 pred_result['F_ry'] = [-Dr * math.sin(Cr * math.atan(Br* alpha_r)) for alpha_r in pred_result['slip_r']]
 
+#kinematic
 pred_result['ax'] = [ 2*(F_rx + F_fx)/(m) for F_fx, F_rx in zip(real_result['F_fx'],real_result['F_rx'])]
-# pred_result['ay'] = 
-# pred_result['F_rz'] =
+
+d_delta_list = []
+d_delta_list.append(0)
+for i in range(1, len(real_result['delta'])):
+    d_delta_list.append((real_result['delta'][i] - real_result['delta'][i-1])/0.01)
+
 #kinematic
 pred_result['yaw_rate'] = [vx * math.cos((lr*math.tan(steer)/(lf+lr)))/(lf+lr) * math.tan(steer) for vx, steer in zip(vx_list, real_result['delta'])]
 
 #dynamic
 # pred_result['yaw_rate'] = [2/Iz * (F_fy * lf * math.cos(steer) - F_ry*lr) for steer, F_fy, F_ry in zip(real_result['delta'],real_result['F_fy'], real_result['F_ry'])]
 
+#kinematic
+# pred_result['ay'] = [ (d_steer*vx + steer * ax) * lr/(lr+lf) for vx, ax, steer, d_steer in zip(dic['Car.vx'],pred_result['ax'],real_result['delta'],d_delta_list)]
 
+#dynamic
+pred_result['ay'] = [ -1/m*(F_ry - F_fy*math.cos(steer)-m*vx*yaw_rate) for vx, F_fy, F_ry, steer, yaw_rate in zip(dic['Car.vx'],pred_result['F_fy'], pred_result['F_ry'],real_result['delta'],pred_result['yaw_rate'])]
+
+# pred_result['F_rz'] =
 
 plt.figure(1)
 plt.subplot(2,1,1)
@@ -230,6 +241,7 @@ plt.legend(loc='best')
 plt.tight_layout() # 두 subplot graph간 간격 적절히 조정
 
 plt.figure(7)
+plt.subplot(2,1,1)
 plt.title('ax Comparison')
 plt.xlabel('Time[sec]')
 plt.ylabel('ax[m/s^2]')
@@ -239,8 +251,20 @@ plt.plot(dic['Time'], real_result['ax'], label='Real')
 # Add a legend to the graph
 plt.legend(loc='best')
 
+plt.subplot(2,1,2)
+plt.title('ay Comparison')
+plt.xlabel('Time[sec]')
+plt.ylabel('ay[m/s^2]')
+plt.plot(dic['Time'], pred_result['ay'], label='Predicted')
+# Plot the real results
+plt.plot(dic['Time'], real_result['ay'], label='Real')
+# Add a legend to the graph
+plt.legend(loc='best')
+plt.tight_layout() # 두 subplot graph간 간격 적절히 조정
+
+
 plt.show()
-eval_keys = ['F_fy', 'F_rx','slip_f','slip_r','yaw_rate','F_ry','ax']
+eval_keys = ['F_fy', 'F_rx','slip_f','slip_r','yaw_rate','F_ry','ax', 'ay']
 for key in eval_keys:
     error_list = [abs(real - pred) for real, pred in zip(pred_result[key], real_result[key])]
     error_avg = sum(error_list) / len(error_list)
