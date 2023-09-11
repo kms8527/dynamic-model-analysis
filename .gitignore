@@ -1,1 +1,16 @@
 *.idea
+asdf.py
+lateral_error_analysis.py
+lookahead_point.txt
+main.py
+param_fitting.py
+tire_model_data_v4.csv
+tire_model_data_v5.csv
+trash.py
+velocity_curvature_lateral_offset.txt
+visuzlieMaxVelocity.py
+.idea/model_analysis.iml
+.gitignore
+main.py
+trash.py
+.idea/model_analysis.iml
