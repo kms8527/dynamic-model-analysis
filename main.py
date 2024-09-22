@@ -201,13 +201,13 @@ pred_result['F_z'] = [(F_rz + F_fz) for F_rz,
 
 # param_.Cm1*x.D - param_.Cm2*x.D*x.vx;
 # ㅗ
-Cm1 = 100
+Cm1 = 2870
 # ㅗㅗ
-Cm2 = 5
+Cm2 = 4050
 # 공기저항 상수
-Cr_rx = 280
+Cr_rx = 300
 # 공기저항 속도제곱비례 상수
-Cd_rx = 0
+Cd_rx = 10
 
 real_reff = []
 rw = 0.321  # wheel radius
@@ -248,7 +248,9 @@ for Reff, W_w, vx in zip(pred_reff, real_result['tire_w'], vx_list):
 
 def calc_Fx(lon_slip, throttle, vx):
     # pred_aceel = (Cm1 - Cm2 * vx) * throttle
-    return C*lon_slip + (Cm1 - Cm2 * vx) * throttle - Cr_rx - Cd_rx * vx ** 2
+    # return C*lon_slip + (Cm1 - Cm2 * vx) * throttle - Cr_rx - Cd_rx * vx ** 2
+    return (Cm1 - Cm2 * vx) * throttle - Cr_rx - Cd_rx * vx ** 2
+    
     # if lon_slip < 0:
     #     return 2*C*lon_slip + (Cm1 - Cm2 * vx) * throttle - Cr_rx - Cd_rx * vx ** 2
     # else:

@@ -3,9 +3,7 @@ asdf.py
 lateral_error_analysis.py
 lookahead_point.txt
 main.py
-param_fitting.py
-tire_model_data_v4.csv
-tire_model_data_v5.csv
+param_fitting.pyss
 trash.py
 velocity_curvature_lateral_offset.txt
 visuzlieMaxVelocity.py

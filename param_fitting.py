@@ -20,7 +20,7 @@ dic = {}
 for key in data[0].keys():
     dic[key] = [float(row[key]) for row in data]
 
-keys = ['F_fx', 'F_fy', 'F_fz', 'F_rx', 'F_ry', 'F_rz',
+keys = ['time', 'F_fx', 'F_fy', 'F_fz', 'F_rx', 'F_ry', 'F_rz',
         'delta' 'yaw', 'yaw_rate', 'lon_slip', 'slip_f', 'slip_r', 'ax']
 m = 2065.03  # [kg]
 lf = 1.169  # [m]
@@ -41,6 +41,7 @@ elif (dic.get["Driver.Gas"]):
 real_result = {}
 pred_result = {}
 
+# real_result['time'] = dic['time']
 # 실제 차량 앞 타이어 힘 구하기
 real_result['F_fx'] = [
     (FL + FR) for FL, FR in zip(dic['Car.CFL.Tire.FrcC.x'], dic['Car.CFR.Tire.FrcC.x'])]
@@ -118,7 +119,6 @@ F_fy_data_sorted = np.array([F_fy_data_sorted])
 alpha_f_data_sorted = np.ravel(alpha_f_data_sorted)
 F_fy_data_sorted = np.ravel(F_fy_data_sorted)
 
-
 # Find the optimal parameters Df, Cf, and Bf
 popt, _ = curve_fit(pacejka_model, alpha_f_data_sorted, F_fy_data_sorted, p0=initial_guess, maxfev=100000)
 
@@ -143,7 +143,7 @@ plt.show()
 
 
 # Example data; replace these with your actual data
-initial_guess = [100000.0, 1.0, 1.0] # Df, Cf, Bf
+initial_guess = [5000.0, 1.0, 1.0] # Df, Cf, Bf
 
 # Combine and sort the data using the zip function
 combined_data = sorted(zip(real_result['slip_r'],  real_result['F_ry']))
@@ -179,7 +179,7 @@ plt.title("Pacejka Model Fitting")
 plt.legend()
 plt.show()
 
-initial_guess = [0,0,0,0] # Cm1, Cm2, Cr_rx, Cr_rx
+initial_guess = [28700,4550,300,10] # Cm1, Cm2, Cr_rx, Cr_rx
 
 # Combine and sort the data using the zip function
 combined_data = sorted(zip(real_result['lon_slip'],  gas_list, vx_list))
@@ -198,13 +198,14 @@ vx_sorted = np.ravel(vx_sorted)
 
 def calc_Fx(x, Cm1, Cm2, Cr_rx, Cd_rx):
     lon_slip, throttle, vx = x
-    return Cm1 * lon_slip + (Cm2 - Cr_rx * vx) * throttle - Cd_rx * vx ** 2
+    # return Cm1 * lon_slip + (Cm2 - Cr_rx * vx) * throttle - Cd_rx * vx ** 2
+    return (Cm1 - Cm2 * vx) * throttle - Cr_rx - Cd_rx * vx ** 2
 
 # Prepare combined independent data
 x_data = np.vstack((lon_slip_sorted, gas_sorted, vx_sorted))
 
 # Find the optimal parameters
-popt, _ = curve_fit(calc_Fx, x_data, gas_sorted, p0=initial_guess, maxfev=100000)
+popt, _ = curve_fit(calc_Fx, x_data, gas_sorted, p0=initial_guess, maxfev=10000)
 
 Cm1_opt, Cm2_opt, Cr_rx_opt, Cd_rx_opt = popt
 
@@ -213,7 +214,7 @@ print(f"Optimal parameters: Cm1={Cm1_opt:.4f}, Cm2={Cm2_opt:.4f}, Cr_rx={Cr_rx_o
 # Generate fitted F_x data
 fitted_F_x = calc_Fx(x_data, *popt)
 # Plot the original data points
-plt.scatter(lon_slip_sorted, real_result['F_x'], label="Original data")
+plt.scatter(dic['Time'], real_result['F_x'], label="Original data")
 
 # Plot the fitted model
 plt.plot(lon_slip_sorted, fitted_F_x, linestyle="--", color="red", label="Fitted model")
