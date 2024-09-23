@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import numpy as np
 
-filename = "tire_model_data.CSV"
+filename = "tire_model_data.csv"
 
 # Read the CSV file and store the data as a list of dictionaries
 with open(filename, newline='', encoding='utf-8') as csvfile:
@@ -123,11 +123,11 @@ pred_result['F_fy'] = [predict_fy(alpha_f, optimal_Df, optimal_Cf, optimal_Bf) f
 
 
 # param_.Dr * std::sin(param_.Cr * std::atan(param_.Br * alpha_r ));
-Dr = 130000; Cr = 1; Br = 1;
+Dr = 130000; Cr = 1; Br = 1
 pred_result['F_rx'] = [Dr * math.sin(Cr * math.atan(Br* alpha_r)) for alpha_r in pred_result['slip_r']]
 
 # param_.Cm1*x.D - param_.Cm2*x.D*x.vx;
-Cm1 = 1; Cm2 = 1;
+Cm1 = 1; Cm2 = 1
 pred_result['F_ry'] = [(Cm1 - Cm2 * vx) * throttle for vx, throttle in zip(vx_list, gas_list)]
 # pred_result['F_rz'] =
 # pred_result['yaw_rate'] =
