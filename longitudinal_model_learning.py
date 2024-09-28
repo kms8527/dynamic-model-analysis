@@ -57,6 +57,7 @@ def predict_output(theta, Phi):
     return Y_pred
 
 def accumulate_prediction(theta, y, u, n=2, m=2):
+    
     N = len(y)
     y_pred = np.zeros(N)
     y_pred[:n] = y[:n]  # Initialize the first n values with actual data
@@ -75,14 +76,12 @@ def accumulate_prediction(theta, y, u, n=2, m=2):
 
     return y_pred
 
-
-
 # Load the data from CSV file
-time, velocity, acceleration = load_data('./morai_model_identification_data.csv')
+time, velocity, acceleration = load_data('./2024_competition_dataset/avante_cn7_info_cmd_vel_data.csv')
 
 # Number of past values to use for outputs and inputs
-n = 1  # Number of past outputs (adjust based on system order)
-m = 1  # Number of past inputs (adjust based on system order)
+n = 10 # Number of past outputs (adjust based on system order)
+m = 10 # Number of past inputs (adjust based on system order)
 
 # Build the regression matrix (Phi) and the output vector (Y)
 Phi, Y = build_regression_matrix(velocity, acceleration, n, m)
