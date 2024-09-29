@@ -12,3 +12,6 @@ visuzlieMaxVelocity.py
 main.py
 trash.py
 .idea/model_analysis.iml
+2024_competition_dataset/result/*
+2024_competition_dataset/real_result/*
+2024_competition_dataset/sim_result/*

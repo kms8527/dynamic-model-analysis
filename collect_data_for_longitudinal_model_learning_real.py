@@ -6,6 +6,8 @@ from geometry_msgs.msg import Twist
 import pandas as pd
 import os
 
+save_dir = './avante_cn7_info_cmd_vel_data2.csv'
+
 class DataCollector:
     def __init__(self):
         rospy.init_node('data_collector', anonymous=True)
@@ -22,7 +24,7 @@ class DataCollector:
         self.cmd_velocity_ = 0.0   # Velocity command from cmd_vel
 
         # CSV file setup
-        self.file_name = './avante_cn7_info_cmd_vel_data.csv'
+        self.file_name = save_dir
         if not os.path.exists(self.file_name):
             # Create a new file with headers if it doesn't exist
             df = pd.DataFrame(columns=['time', 'velocity_x', 'acceleration'])
