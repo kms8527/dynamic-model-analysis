@@ -4,15 +4,17 @@ from numpy.linalg import inv
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 
-load_train_file_name = 'simple_simulation_data1.csv'
-load_valid_file_name = 'simple_simulation_data2.csv'
+load_train_file_name = 'selected_data.csv'
+load_valid_file_name = 'avante_cn7_info_cmd_vel_data.csv' 
 
 # Number of past values to use for outputs and inputs
-n = 1  # Number of past outputs (adjust based on system order)
-m = 2 # Number of past inputs (adjust based on system order)
+n = 2  # Number of past outputs (adjust based on system order)
+m = 3 # Number of past inputs (adjust based on system order)
 
-Ts = 0.01
-test_Ts = 0.01
+Ts = 0.02
+test_Ts = 0.02
+
+use_interpolation = True
 
 # Load data from CSV
 def load_data(file_name):
@@ -131,16 +133,13 @@ def accumulate_prediction(theta, y, u, n=2, m=2):
     
     N = len(y)
     y_pred = np.zeros(N)
-    # max_dim = 
-    y_pred[:n] = y[:n]  # Initialize the first n values with actual data
+    max_dim = max(n, m)
+    y_pred[:max_dim] = y[:max_dim]  # Initialize the first n values with actual data
 
     # Simulate future steps using accumulated predictions
-    for k in range(n, N-1):
+    for k in range(max_dim, N-1):
         # Construct the regressor with past predictions an d input
         past_outputs = -y_pred[k-n:k]  # Use predicted outputs
-        
-        # if(k-m < 0):
-        #     past_inputs = u[:k]
         
         past_inputs = u[k-m:k]  # Use actual control inputs
 
@@ -169,13 +168,14 @@ acceleration = acceleration[start_idx_offset:]
 #set to 0 the first value of the time
 time = time - time[0]
 
-# interpolate the data with time step
-cubic_velocity = CubicSpline(time, velocity)
-cubic_acceleration = CubicSpline(time, acceleration)
+if(use_interpolation):
+    # interpolate the data with time step
+    cubic_velocity = CubicSpline(time, velocity)
+    cubic_acceleration = CubicSpline(time, acceleration)
 
-time = np.arange(time[0], time[-1], Ts)
-velocity = cubic_velocity(time)
-acceleration = cubic_acceleration(time)
+    time = np.arange(time[0], time[-1], Ts)
+    velocity = cubic_velocity(time)
+    acceleration = cubic_acceleration(time)
 
 
 # Build the regression matrix (Phi) and the output vector (Y)
@@ -196,10 +196,11 @@ Y_pred_accumulated = accumulate_prediction(theta, velocity, acceleration, n, m)
 # Print the identified parameters (theta corresponds to A matrix)
 print("Identified Parameters (Theta):", theta)
 
+max_dix = max(n, m)
 # Optional: Compare actual vs predicted outputs
 plt.figure()
-plt.plot(time[n:], Y, label='Actual Output (y)')
-plt.plot(time[n:], Y_pred, label='Predicted Output (y_pred)')
+plt.plot(time[max_dix:], Y, label='Actual Output (y)')
+plt.plot(time[max_dix:], Y_pred, label='Predicted Output (y_pred)')
 plt.xlabel('Time Step')
 plt.ylabel('Velocity (m/s)')
 plt.title('Actual vs Predicted Velocity')
@@ -275,8 +276,8 @@ Y_pred_accumulated = accumulate_prediction(theta, velocity, acceleration, n, m)
 
 # visualize the result
 plt.figure()
-plt.plot(time[n:], Y, label='Actual Output (y)')
-plt.plot(time[n:], Y_pred, label='Predicted Output (y_pred)')
+plt.plot(time[max_dix:], Y, label='Actual Output (y)')
+plt.plot(time[max_dix:], Y_pred, label='Predicted Output (y_pred)')
 plt.xlabel('Time Step')
 plt.ylabel('Velocity (m/s)')
 plt.title('Actual vs Predicted Velocity')
